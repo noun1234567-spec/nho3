@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار أفعال المقاربة</title>
+<style>
+body {
+  font-family: Tahoma, Arial, sans-serif;
+  background: #f4f6f9;
+  margin: 0;
+  padding: 20px;
+  color: #222;
+}
+.container {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px #ddd;
+}
+h2 {
+  text-align: center;
+  color: #174b39;
+}
+h3 {
+  color: #174b39;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+}
+.question {
+  border: 1px solid #ddd;
+  border-radius: 9px;
+  padding: 16px;
+  margin: 15px 0;
+}
+.options button {
+  display: block;
+  width: 100%;
+  text-align: right;
+  background: #f5f6f8;
+  border: 1px solid #ccc;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: inherit;
+}
+.options button:hover:not(:disabled) {
+  background: #e6eee9;
+}
+.options button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.correct {
+  background: #d8f0df !important;
+  border-color: #26934b !important;
+}
+.wrong {
+  background: #f8dddd !important;
+  border-color: #c33 !important;
+}
+.feedback {
+  margin-top: 10px;
+  font-weight: bold;
+}
+.correct-text { color: #218344; }
+.wrong-text { color: #c22; }
+.result {
+  display: none;
+  background: #eaf2ed;
+  padding: 20px;
+  text-align: center;
+  border-radius: 9px;
+  margin-top: 20px;
+  font-size: 19px;
+}
+#restart {
+  display: none;
+  background: #174b39;
+  color: white;
+  border: none;
+  padding: 13px 25px;
+  border-radius: 7px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 15px auto;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<p style="text-align:center">أجب عن الأسئلة الآتية، واختر إجابة واحدة لكل سؤال.</p>
+
+<div id="trueFalse"></div>
+
+<div id="multipleChoice"></div>
+
+<div class="result" id="result"></div>
+<button id="restart" onclick="restartQuiz()">إعادة الاختبار</button>
+
+</div>
+
+<script>
+const questions = [
+{
+ type: "tf",
+ text: "الإلغاء هو: ترك العمل لفظا ومعنى لغير مانع، والتعليق ترك العمل لفظا لا معنى لمانع.",
+ options: ["صح", "خطأ"],
+ answer: 0,
+ hideAnswer: true
+},{
+ type: "tf",
+ text: "في الجملة «الإلغاء جائز، والتعليق واجب.",
+ options: ["صح", "خطأ"],
+ answer: 0
+},
+{
+ type: "tf",
+ text: "«الإلغاء ترك العمل لفظًا دون معنى لمانع؛ كاللام فِي نحو: (ظننتُ لَزيدٌ قائمٌ).",
+ options: ["صح", "خطأ"],
+ answer: 1
+},
+{
+ type: "tf",
+ text: "في قولنا: «زيدٌ قائمٌ ظننتُ»، فيه إِلغاء لظن وهو ترك العمل لفظًا ومعنَى لا لمانع، بل بسبب توسطه بَينَ مفعولين.",
+ options: ["صح", "خطأ"],
+ answer: 0
+},
+{
+ type: "tf",
+ text: "الأحسن الإلغاء مع التّوسط؛ كـ (زيدًا ظننت قائمًا).",
+ options: ["صح", "خطأ"],
+ answer: 1
+},
+{
+ type: "tf",
+ text: "«الإلغاء والإعمال: سِيَّان مع التّوسط.",
+ options: ["صح", "خطأ"],
+ answer: 0
+},
+{
+ type: "mc",
+ text: "أيُّ الأمثلة الآتية تشتمل على تعليق؟",
+ options: [
+  "زيد قائم ظننت.",
+  "ظننتُ لَزيدٌ قائمٌ.",
+  "خالد ظننت منطلق.",
+  "زيدًا ظننت قائمًا."
+ ],
+ answer: 1
+},{
+ type: "mc",
+ text: "أيُّ الأمثلة الآتية تشتمل على إلغاء؟",
+ options: [
+  "ظننتُ لَزيدٌ قائمٌ.",
+  "علمتُ زيدًا قائمًا.",
+  "وجدت الصدق منجاة.",
+  "زيد قائم ظننت."
+ ],
+ answer: 3
+},
+{
+ type: "mc",
+ text: "ما الفرق بين الإلغاء والتعليق في باب «ظنَّ وأخواتها»؟",
+ options: [
+  "الإلغاء ترك العمل لفظًا ومعنًى لا لمانع، والتعليق ترك العمل لفظًا لا معنًى لوجود مانع.",
+  "الإلغاء ترك العمل لفظًا لا معنًى لوجود مانع، والتعليق ترك العمل لفظًا ومعنًى لا لمانع.",
+  "الإلغاء والتعليق كلاهما ترك العمل لفظًا ومعنًى لوجود مانع.",
+  "الإلغاء خاص بالأفعال الجامدة، والتعليق خاص بالأفعال المتصرفة."
+ ],
+ answer: 0
+},
+{
+ type: "mc",
+ text: "ما الحكم النحوي لـ«ظننتُ» في قولنا: «زيدٌ ظننتُ قائمٌ»؟",
+ options: [
+  "تعليق؛ لأن الفعل أُبطل عمله لفظًا لا محلًّا بسبب وجود لام الابتداء.",
+  "إلغاء؛ لأن الفعل ترك العمل لفظًا ومعنًى لا لمانع، لتوسطه بين المبتدأ والخبر.",
+  "إعمال؛ لأن الفعل نصب المبتدأ والخبر مفعولين له.",
+  "إلغاء؛ لأن الفعل جامد لا يتصرف فلا يعمل."
+ ],
+ answer: 1
+},
+{
+ type: "mc",
+ text: "ما الحكم النحوي لـ«أظنُّ» في قولنا: «أظنُّ لَزيدٌ قائمٌ»؟",
+ options: [
+  "إلغاء؛ لأن الفعل تقدم على المبتدأ والخبر.",
+  "إعمال؛ لأن «زيدٌ» و«قائمٌ» مفعولان للفعل «أظنُّ».",
+  "تعليق؛ لأن لام الابتداء منعت الفعل من العمل لفظًا، وبقي عمله في المحل.",
+  "تعليق؛ لأن الفعل ترك العمل لفظًا ومعنًى بسبب اللام."
+ ],
+ answer: 2
+},
+{
+ type: "mc",
+ text: "أي الجمل الآتية يُعدّ من باب التعليق لا الإلغاء؟",
+ options: [
+  "«زيدٌ قائمٌ ظننتُ».",
+  "«ظننتُ ما زيدٌ قائمٌ».",
+  "«زيدٌ ظننتُ قائمٌ».",
+  "«زيدٌ أظنُّ قائمٌ»."
+ ],
+ answer: 1
+},
+{
+ type: "mc",
+ text: "أي الأفعال الآتية لا يدخله تعليق ولا إلغاء؟",
+ options: [
+  "«ظنَّ» في «ظننتُ زيدًا قائمًا».",
+  "«علم» في «علمتُ لَزيدٌ قائمٌ».",
+  "«صيَّر» في «صيَّرتُ الطينَ إبريقًا».",
+  "«حسب» في «زيدٌ حسبتُ قائمٌ»."
+ ],
+ answer: 2
+},
+];
+
+let score = 0;
+let answered = 0;
+
+function renderQuestions() {
+ const tf = document.getElementById("trueFalse");
+ const mc = document.getElementById("multipleChoice");
+
+ questions.forEach((q, i) => {
+  const div = document.createElement("div");
+  div.className = "question";
+  div.innerHTML = `
+   <strong>${i + 1}. ${q.text}</strong>
+   <div class="options">
+    ${q.options.map((opt, j) =>
+     `<button onclick="checkAnswer(${i},${j},this)">${opt}</button>`
+    ).join("")}
+   </div>
+   <div class="feedback" id="feedback${i}"></div>
+  `;
+  (q.type === "tf" ? tf : mc).appendChild(div);
+ });
+}
+
+function checkAnswer(qIndex, selected, btn) {
+ const q = questions[qIndex];
+ const parent = btn.parentElement;
+ const buttons = parent.querySelectorAll("button");
+ buttons.forEach(b => b.disabled = true);
+
+ answered++;
+
+ if (selected === q.answer) {
+  score++;
+  btn.classList.add("correct");
+  document.getElementById("feedback" + qIndex).innerHTML =
+   '<span class="correct-text">✓ إجابة صحيحة</span>';
+ } else {
+  btn.classList.add("wrong");
+  buttons[q.answer].classList.add("correct");
+  if (q.hideAnswer) {
+   document.getElementById("feedback" + qIndex).innerHTML =
+    '<span class="wrong-text">✗ إجابة غير صحيحة</span>';
+  } else {
+   document.getElementById("feedback" + qIndex).innerHTML =
+    '<span class="wrong-text">✗ إجابة غير صحيحة. الإجابة الصحيحة: ' +
+    q.options[q.answer] + '</span>';
+  }
+ }
+
+ if (answered === questions.length) showResult();
+}
+
+function showResult() {
+ const result = document.getElementById("result");
+ const percent = Math.round((score / questions.length) * 100);
+ result.style.display = "block";
+ result.innerHTML =
+  "<strong>انتهى الاختبار</strong><br><br>" +
+  "درجتك: " + score + " من " + questions.length + "<br>" +
+  "النسبة: " + percent + "%";
+ document.getElementById("restart").style.display = "block";
+}
+
+function restartQuiz() {
+ score = 0;
+ answered = 0;
+ document.getElementById("trueFalse").innerHTML = "";
+ document.getElementById("multipleChoice").innerHTML = "";
+ document.getElementById("result").style.display = "none";
+ document.getElementById("restart").style.display = "none";
+ renderQuestions();
+}
+
+renderQuestions();
+</script>
+</body>
+</html>
